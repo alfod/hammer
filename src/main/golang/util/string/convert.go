@@ -17,10 +17,10 @@ func toCamel(under_line string, include_head bool) string {
 		}
 		buffer.WriteByte(under_line[i])
 	}
-
 	//fmt.Println(buffer.String())
 	return buffer.String()
 }
+
 
 func ToLowerCamel(under_line string) string {
 	return toCamel(under_line, false)

@@ -23,8 +23,8 @@ var mysql_java_type_map = map[string]string{
 	"ID":        "Long",
 	"DATE":      "Date",
 	"TIME":      "Time",
-	"DATETIME":  "Timestamp",
-	"TIMESTAMP": "Timestamp",
+	"DATETIME":  "Date",
+	"TIMESTAMP": "Date",
 	"YEAR":      "Date",
 	"INT":       "Integer",
 }
