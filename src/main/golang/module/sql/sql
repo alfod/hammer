@@ -10,3 +10,15 @@ create table `managesystemv1.0`.institution_scale_history
 )
 ;
 
+
+create table `managesystemv1.0`.institution_scale
+(
+	id int auto_increment comment 'id' primary key,
+	operator_id int default '0' not null comment '操作人id',
+	institution_id int default '0' not null comment '机构id',
+	scale int default '0' not null comment '机构规模(机构雇员人数)',
+	update_time datetime not null comment '更新时间',
+	create_time datetime not null comment '创建时间'
+)
+;
+

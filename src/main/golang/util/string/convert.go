@@ -18,6 +18,7 @@ func toCamel(under_line string, include_head bool) string {
 		buffer.WriteByte(under_line[i])
 	}
 	//fmt.Println(buffer.String())
+	buffer.String()
 	return buffer.String()
 }
 

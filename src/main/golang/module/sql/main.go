@@ -9,74 +9,90 @@ import (
 
 	"os"
 
+	sql2 "main/golang/util/sql"
+
 	"path/filepath"
 	"runtime"
 
-	"path"
-
-	sql2 "main/golang/util/sql"
-	u "main/golang/util/string"
+	strings2 "main/golang/util/string"
+	"strconv"
 )
 
 
 func main() {
 
-	sql, _ := ioutil.ReadFile(getCurrentFilePath() + "sql")
-	var Sql = string(sql)
-	//fmt.Println(Sql)
-	var buffer bytes.Buffer
-
-	tableName := regexp.MustCompile(`create table (.*\.)?(.*)`).FindStringSubmatch(Sql)
-	commentReg := regexp.MustCompile("comment\\s+'(.*)'\\s*")
-	if len(tableName) < 2 {
-		log.Println(tableName)
-		return
+	sqlBytes, _ := ioutil.ReadFile(GetCurrentFilePath() + "sql")
+	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
+	var sqlStr = string(sqlBytes)
+	//log.Println(sqlStr)
+	//var sqlTest []string = regexp.MustCompile(`(\s*create\s+table.+\s*\n?\((.*\n)+)`).FindStringSubmatch(sqlStr)
+	//log.Println(sqlTest)
+	//var sqlTest []string = regexp.MustCompile(`(.*\n)+`).FindStringSubmatch(sqlStr)
+	//log.Println(sqlTest)
+	var sqls []string = regexp.MustCompile(`(\s*create{1}\s+table.+\s*\n?\((.*\n)+?\)\n)+`).FindStringSubmatch(sqlStr)
+	//log.Println(sqls)
+	if len(sqls) > 0 {
+		for i, sql := range sqls {
+			log.Println("i: "+strconv.Itoa(i)+"\n"+sql)
+			dealSingleCreateSql(sql)
+		}
+	} else {
+		log.Fatal("split file failed")
 	}
 
-	var class_name = u.ToUpperCamel(tableName[2])
+}
+
+func dealSingleCreateSql(sql string) {
+	var buffer bytes.Buffer
+	tableName := regexp.MustCompile(`create\s+table\s+(\S+\.)?(\S+)`).FindStringSubmatch(sql)
+	commentReg := regexp.MustCompile(`comment\s+'(\S*)'\s*`)
+	if len(tableName) < 2 {
+		log.Fatal(tableName)
+	}
+	var class_name = strings2.ToUpperCamel(tableName[2])
 
 	buffer.WriteString("public class " + class_name + "{ \n")
-	//log.Println(class_name)
-	content := Sql[strings.Index(Sql, "(")+1: strings.LastIndex(Sql, ")")]
-	//log.Println(content)
-	lines := strings.Split(content, "\n")
+	content := sql[strings.Index(sql, "(")+1: strings.LastIndex(sql, ")")]
+
+	var lines []string
+	if strings.Contains(content, ",\r\n") {
+		lines = strings.Split(content, ",\r\n")
+	} else {
+		lines = strings.Split(content, ",\n")
+	}
+
 	var field, comments []string
 	var strType, comment string
 	for _, line := range lines {
-		//log.Println("i " + strconv.Itoa(i) + "  " + line)
-
 		field = strings.Fields(line)
 		comments = commentReg.FindStringSubmatch(line)
 		if len(comments) > 0 {
-			comment = commentReg.FindStringSubmatch(line)[1]
-			buffer.WriteString("    //  " + comment + "\n")
+			comment = comments[1]
+			buffer.WriteString("    //*  " + comment + "*/ \n")
 		}
-
 		if len(field) > 2 {
 			strType = sql2.GetJavaTypeByMySql(field[1])
-			//log.Println(field)
-			buffer.WriteString("    private " + strType + " " + u.ToLowerCamel(field[0]) + ";\n")
+			buffer.WriteString("    private " + strType + " " + strings2.ToLowerCamel(field[0]) + ";\n")
 		}
 	}
 
 	buffer.WriteString("}\n")
-	file_name := class_name + "df"
-	log.Println(file_name)
-	var java_file string = path.Join("main/golang/module/sql/", class_name+"java")
+	var java_file string = "main/golang/module/sql/" + class_name + ".java"
 	file, err := os.Create(java_file)
-
 	if err != nil {
 		log.Fatal(err)
 	} else {
 		file.WriteString(buffer.String())
 	}
-
+	file.Close()
 }
 
-func getCurrentFilePath() string {
+func GetCurrentFilePath() string {
 	_, filename, _, _ := runtime.Caller(0)
 	dir1, _ := filepath.Split(filename)
 	return dir1
 }
+
+
 
 
