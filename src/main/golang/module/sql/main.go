@@ -14,8 +14,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	strings2 "main/golang/util/string"
 	"strconv"
+
+	strings2 "main/golang/util/string"
 )
 
 
@@ -73,10 +74,11 @@ func dealSingleCreateSql(sql string) {
 	buffer.WriteString("}\n")
 	var java_file string = "main/golang/module/sql/" + class_name + ".java"
 	file, err := os.Create(java_file)
+	file_content := buffer.String()
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		file.WriteString(buffer.String())
+		file.WriteString(file_content)
 	}
 	file.Close()
 }
