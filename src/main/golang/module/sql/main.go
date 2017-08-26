@@ -24,13 +24,7 @@ func main() {
 	sqlBytes, _ := ioutil.ReadFile(GetCurrentFilePath() + "sql")
 	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
 	var sqlStr = string(sqlBytes)
-	//log.Println(sqlStr)
-	//var sqlTest []string = regexp.MustCompile(`(\s*create\s+table.+\s*\n?\((.*\n)+)`).FindStringSubmatch(sqlStr)
-	//log.Println(sqlTest)
-	//var sqlTest []string = regexp.MustCompile(`(.*\n)+`).FindStringSubmatch(sqlStr)
-	//log.Println(sqlTest)
-	var sqls []string = regexp.MustCompile(`(\s*create{1}\s+table.+\s*\n?\((.*\n)+?\)\n)+`).FindStringSubmatch(sqlStr)
-	//log.Println(sqls)
+	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\S+\n?\((.*\n)+?\))+.*`).FindAllString(sqlStr,-1)
 	if len(sqls) > 0 {
 		for i, sql := range sqls {
 			log.Println("i: "+strconv.Itoa(i)+"\n"+sql)
