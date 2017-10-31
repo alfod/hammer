@@ -24,8 +24,9 @@ func main() {
 
 	sqlBytes, _ := ioutil.ReadFile(GetCurrentFilePath() + "sql")
 	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
-	var sqlStr = string(sqlBytes)
-	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\S+\n?\((.*\n)+?\))+.*`).FindAllString(sqlStr,-1)
+	var sqlStr = strings.ToLower(string(sqlBytes))
+	log.Println(sqlStr)
+	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\S+\n?\((.*\n)+?\))+.* `).FindAllString(sqlStr, -1)
 	if len(sqls) > 0 {
 		for i, sql := range sqls {
 			log.Println("i: "+strconv.Itoa(i)+"\n"+sql)
@@ -40,7 +41,7 @@ func main() {
 func dealSingleCreateSql(sql string) {
 	var buffer bytes.Buffer
 	tableName := regexp.MustCompile(`create\s+table\s+(\S+\.)?(\S+)`).FindStringSubmatch(sql)
-	commentReg := regexp.MustCompile(`comment\s+'(\S*)'\s*`)
+	commentReg := regexp.MustCompile(`comment\s+'(.*)'\s*`)
 	if len(tableName) < 2 {
 		log.Fatal(tableName)
 	}
@@ -63,7 +64,7 @@ func dealSingleCreateSql(sql string) {
 		comments = commentReg.FindStringSubmatch(line)
 		if len(comments) > 0 {
 			comment = comments[1]
-			buffer.WriteString("    //*  " + comment + "*/ \n")
+			buffer.WriteString("    /**  " + comment + "*/ \n")
 		}
 		if len(field) > 2 {
 			strType = sql2.GetJavaTypeByMySql(field[1])
