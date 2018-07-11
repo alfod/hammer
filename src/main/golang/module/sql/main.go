@@ -8,15 +8,13 @@ import (
 	"strings"
 
 	"os"
-
-	sql2 "main/golang/util/sql"
+    "strconv"
+	sql2 "../../util/sql"
 
 	"path/filepath"
 	"runtime"
 
-	"strconv"
-
-	strings2 "main/golang/util/string"
+	strings2 "../../util/string"
 )
 
 
@@ -24,12 +22,13 @@ func main() {
 
 	sqlBytes, _ := ioutil.ReadFile(GetCurrentFilePath() + "sql")
 	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
+	sqlBytes = bytes.Replace(sqlBytes, []byte("`"), []byte(""), -1)
 	var sqlStr = strings.ToLower(string(sqlBytes))
-	log.Println(sqlStr)
-	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\S+\n?\((.*\n)+?\))+.* `).FindAllString(sqlStr, -1)
+	//log.Println(sqlStr)
+	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\w+\s*\n?\(\s*\n?(\s*[a-zA-Z\']+.*\n?)+\s*\n*\s*\)\s*\n*)+`).FindAllString(sqlStr, -1)
 	if len(sqls) > 0 {
-		for i, sql := range sqls {
-			log.Println("i: "+strconv.Itoa(i)+"\n"+sql)
+		for i,sql := range sqls {
+			log.Println("i: "+strconv.Itoa(i)+"\n")
 			dealSingleCreateSql(sql)
 		}
 	} else {
@@ -73,7 +72,7 @@ func dealSingleCreateSql(sql string) {
 	}
 
 	buffer.WriteString("}\n")
-	var java_file string = "main/golang/module/sql/" + class_name + ".java"
+	var java_file string = "./" + class_name + ".java"
 	file, err := os.Create(java_file)
 	file_content := buffer.String()
 	if err != nil {

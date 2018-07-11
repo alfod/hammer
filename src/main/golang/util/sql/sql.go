@@ -15,7 +15,7 @@ var mysql_java_type_map = map[string]string{
 	"SMALLINT":  "Integer",
 	"MEDIUMINT": "Integer",
 	"BIT":       "Boolean",
-	"BIGINT":    "BigInteger",
+	"BIGINT":    "Integer",
 	"FLOAT":     "Float",
 	"DOUBLE":    "Double",
 	"DECIMAL":   "BigDecimal",
