@@ -2,20 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b39f8b89-5946-4cf2-8fa1-ec6f1cd389f2" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/pkg/Build main.exe" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/pkg/Build_main_go_and_run.exe" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/pkg/windows_amd64/main/golang/util/file.a" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/pkg/windows_amd64/main/golang/util/sql.a" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/pkg/windows_amd64/main/golang/util/string.a" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" afterPath="$PROJECT_DIR$/.idea/encodings.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/GOPATH__hammer_.xml" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/GOPATH__go_.xml" afterPath="$PROJECT_DIR$/.idea/libraries/GOPATH__go_.xml" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/go.xml" afterPath="$PROJECT_DIR$/.idea/libraries/go.xml" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/hammer.iml" afterPath="$PROJECT_DIR$/hammer.iml" />
-      <change beforePath="$PROJECT_DIR$/src/main/golang/module/sql/main.go" afterPath="$PROJECT_DIR$/src/main/golang/module/sql/main.go" />
-      <change beforePath="$PROJECT_DIR$/src/main/golang/module/sql/sql" afterPath="$PROJECT_DIR$/src/main/golang/module/sql/sql" />
-      <change beforePath="$PROJECT_DIR$/src/main/golang/util/sql/sql.go" afterPath="$PROJECT_DIR$/src/main/golang/util/sql/sql.go" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -574,7 +563,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="init project" />
     <MESSAGE value="gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="gitignore" />
+    <MESSAGE value="success" />
+    <option name="LAST_COMMIT_MESSAGE" value="success" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
