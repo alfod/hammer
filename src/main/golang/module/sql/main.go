@@ -88,12 +88,11 @@ func dealSingleCreateSql(sql string) {
 			if (packagePath != "" && result == "") {
 				packagePathMap[types[index]] = packagePath
 				buffer.WriteString(packagePath)
-				buffer.WriteString("\n\n")
+
 			}
 		}
-
 	}
-
+	buffer.WriteString("\n\n")
 	var class_name = strings2.ToUpperCamel(tableName[2])
 
 	buffer.WriteString("public class " + class_name + "{ \n")
@@ -133,6 +132,7 @@ func dealSingleCreateSql(sql string) {
 	}
 
 	buffer.WriteString("\n")
+	//toString
 	buffer.WriteString(`     @Override
      public String toString() {
 		`)
