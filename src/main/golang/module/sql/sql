@@ -15,14 +15,20 @@ CREATE TABLE `goose_activity` (
   COMMENT '任务环节数',
   `published`             INT(1)                DEFAULT '0'
   COMMENT '发布状态，0 未发布，1 已发布，2 取消发布',
-    `operator_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人id',
+  `creator_id` int(11) NOT NULL DEFAULT '0' COMMENT '创建人id',
+    `operator_id` int(11) NOT NULL DEFAULT '0' COMMENT '更新人id',
   `create_time`           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
   COMMENT '创建时间',
   `update_time`           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
   COMMENT '更新时间',
   `deleted`               TINYINT(1)   NOT NULL DEFAULT '0'
-  COMMENT '已删除 0否 1是，默认0 '
+  COMMENT '已删除 0否 1是，默认0 ',
+  PRIMARY KEY (`id`),
+  KEY `grade_id` (`grade_id`)
 )
+  ENGINE = InnoDB
+  DEFAULT CHARSET = utf8
+  COMMENT ='活动表';
 
 #活动_微信用户表
 CREATE TABLE goose_activity_wechat_user
@@ -32,14 +38,18 @@ CREATE TABLE goose_activity_wechat_user
   COMMENT '活动id',
   ins_id         INT(11) DEFAULT -1                 NOT NULL
   COMMENT '机构id',
-  wechat_code VARCHAR(50) DEFAULT -1                 NOT NULL
+  wechat_code VARCHAR(50) DEFAULT  ''                NOT NULL
   COMMENT '微信用户',
   `create_time`  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '创建时间',
   `update_time`  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '更新时间',
   `deleted`      TINYINT(1) DEFAULT '0'             NOT NULL
-  COMMENT '已删除 0否 1是，默认0 '
+  COMMENT '已删除 0否 1是，默认0 ',
+  `operator_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人id',
+  KEY `activity_id` (`activity_id`),
+  KEY `ins_id` (`ins_id`),
+  KEY `wechat_code` (`wechat_code`)
 );
 
 #任务表
@@ -48,12 +58,15 @@ CREATE TABLE goose_task
   id            INT(11) PRIMARY KEY                NOT NULL AUTO_INCREMENT,
   name          VARCHAR(100) DEFAULT ""            NOT NULL
   COMMENT '任务名字',
+    activity_id    INT(11) DEFAULT -1                 NOT NULL
+  COMMENT '活动id',
   click_num     INT(11) DEFAULT 0                  NOT NULL
   COMMENT '点击量',
   submit_num    INT(11) DEFAULT 0                  NOT NULL
   COMMENT '提交量',
   question_num  INT(11) DEFAULT 0                  NOT NULL
   COMMENT '题目数',
+  `creator_id` int(11) NOT NULL DEFAULT '0' COMMENT '创建人id',
     `operator_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人id',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '创建时间',
@@ -62,8 +75,9 @@ CREATE TABLE goose_task
   `deleted`     TINYINT(1) DEFAULT '0'             NOT NULL
   COMMENT '已删除 0否 1是，默认0 '
 );
+ALTER TABLE goose_task
+  COMMENT = '任务表';
 
-  
 #任务_学科_试卷
 CREATE TABLE goose_task_sub_pro_paper
 (
@@ -74,13 +88,15 @@ CREATE TABLE goose_task_sub_pro_paper
   COMMENT '学科id',
   question_num       INT(11) DEFAULT 0                  NOT NULL
   COMMENT '试题数目',
+  `creator_id` int(11) NOT NULL DEFAULT '0' COMMENT '创建人id',
     `operator_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人id',
   `create_time`      DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '创建时间',
   `update_time`      DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '更新时间',
-  `deleted`          TINYINT(1) DEFAULT '0'             NOT NULL
-  COMMENT '已删除 0否 1是，默认0 '
+ `deleted`          TINYINT(1) DEFAULT '0'             NOT NULL
+  COMMENT '已删除 0否 1是，默认0 ',
+  KEY `task_id` (`task_id`)
 );
 
 #任务_微信用户
@@ -89,7 +105,7 @@ CREATE TABLE goose_task_wechat_user
   id             INT(11) PRIMARY KEY                NOT NULL AUTO_INCREMENT,
   task_id        INT(11) DEFAULT -1                 NOT NULL
   COMMENT '任务id',
-  wechat_code VARCHAR(50) DEFAULT -1                 NOT NULL
+  wechat_code VARCHAR(50) DEFAULT ""                 NOT NULL
   COMMENT '微信用户',
   completed      TINYINT(1) DEFAULT 0               NOT NULL
   COMMENT '已完成， 0 否 1 是',
@@ -98,39 +114,30 @@ CREATE TABLE goose_task_wechat_user
   `update_time`  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '更新时间',
   `deleted`      TINYINT(1) DEFAULT '0'             NOT NULL
-  COMMENT '已删除 0否 1是，默认0 '
+  COMMENT '已删除 0否 1是，默认0 ',
+  `operator_id` int(11) NOT NULL DEFAULT '0' COMMENT '操作人id',
+  KEY `task_id` (`task_id`),
+  KEY `wechat_code` (`wechat_code`)
 );
 
 #微信用户
 CREATE TABLE goose_wechat_user
 (
   id            INT(11) PRIMARY KEY                NOT NULL AUTO_INCREMENT,
-  wechat_code   VARCHAR(50) DEFAULT ""             NOT NULL COMMENT '微信code',
-  nick_name     VARCHAR(100) DEFAULT ""            NOT NULL COMMENT '微信昵称',
+  wechat_code   VARCHAR(50) DEFAULT ""             NOT NULL
+  COMMENT '微信code',
+  nick_name     VARCHAR(100) DEFAULT ""            NOT NULL
+  COMMENT '微信昵称',
   `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '创建时间',
   `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
   COMMENT '更新时间',
+  operator_id  int unsigned DEFAULT -1                            not null
+  comment '操作人id'
+  ,
   `deleted`     TINYINT(1) DEFAULT '0'             NOT NULL
   COMMENT '已删除 0否 1是，默认0 '
 );
-
-#微信群用户表
-CREATE TABLE goose_wechat_group_user
-(
-  id              INT(11) PRIMARY KEY                NOT NULL AUTO_INCREMENT,
-  wechat_code     VARCHAR(50) DEFAULT ''             NOT NULL
-  COMMENT '微信code',
-  wechat_group_id INT(11) DEFAULT -1                 NOT NULL
-  COMMENT '微信群id',
-  `create_time`   DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
-  COMMENT '创建时间',
-  `update_time`   DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL
-  COMMENT '更新时间',
-  `deleted`       TINYINT(1) DEFAULT '0'             NOT NULL
-  COMMENT '已删除 0否 1是，默认0 '
-);
-
 
 # 问题反馈表
 create table goose_problem_feedback (
@@ -160,14 +167,16 @@ create table goose_problem_feedback (
   describle      varchar(400)   DEFAULT ""    not null
   comment '问题描述',
   create_time    datetime         not null  default current_timestamp
-  comment '提交时间‘',
+  comment '提交时间',
+  operator_id  int unsigned DEFAULT -1                            not null
+  comment '操作人id',
   update_time    datetime           not null  default current_timestamp
-  comment '提交时间‘'
+  comment '提交时间'
 
 );
 
 #多媒体表， 保存一对多的多媒体url信息
-create table url (
+create table goose_pictures (
   id          int auto_increment not null  primary key
   comment 'id',
   url         varchar(300)   DEFAULT ""    not null
@@ -184,21 +193,26 @@ create table url (
   comment '业务表id',
   deleted     int       DEFAULT -1         not null
   comment '0, 没有删除, 1 已经删除',
+  operator_id  int unsigned DEFAULT -1                            not null
+  comment '操作人id',
   remark      varchar(300)  DEFAULT ""     not null
   comment '备注',
   create_time datetime           not null  default current_timestamp
-  comment '提交时间‘',
+  comment '创建时间',
   update_time datetime           not null  default current_timestamp
-  comment '提交时间‘'
+  comment '提交时间'
 
 );
 
-# 提交表
-create table goose_submit (
+# 学生提交问题的答案和教师点评表
+create table goose_question_answer (
   id                int auto_increment                                not null  primary key
   comment 'id',
   wechat_code       varchar(50) DEFAULT ''                            not null
   comment 'WeChat code',
+ wechat_group_id INT(11) DEFAULT -1                 NOT NULL
+  COMMENT '微信群id',
+
   activity_id       int unsigned DEFAULT -1                           not null
   comment '活动id',
   task_id           int unsigned DEFAULT -1                           not null
@@ -214,11 +228,22 @@ create table goose_submit (
   submit_content    varchar(300) DEFAULT ''                           not null
   comment '学生提交内容',
   submit_comment    varchar(200) DEFAULT ''                           not null
-  comment '教师点评内容',
+  comment '教师点评内容
+  ',
+   valid    TINYINT(1) DEFAULT '1'                           not null
+  comment '是否在分享有效期内 0 无效，1有效
+  ',
+  submit_time       datetime default current_timestamp                not null
+  comment '提交时间',
+
   create_time       datetime default current_timestamp                not null
-  comment '提交时间‘',
+  comment '创建时间',
+  deleted     int       DEFAULT -1         not null
+  comment '0, 没有删除, 1 已经删除',
+  operator_id  int unsigned DEFAULT -1                            not null
+  comment '操作人id',
   update_time       datetime default current_timestamp                not null
-  comment '提交时间‘'
+  comment '修改时间'
 
 );
 
@@ -228,14 +253,18 @@ create table goose_share_record (
   comment 'id',
   wechat_group_id int unsigned DEFAULT -1                            not null
   comment '微信群id',
-  institution_id  int unsigned DEFAULT -1                            not null
+  teacher_id  int unsigned DEFAULT -1                            not null
   comment '教师id',
   activity_id     int unsigned DEFAULT -1                            not null
   comment '活动id',
   create_time     datetime default current_timestamp                 not null
-  comment '提交时间‘',
+  comment '提交时间',
+  operator_id  int unsigned DEFAULT -1                            not null
+  comment '操作人id',
+  deleted     tinyint(1)       DEFAULT -1         not null
+  comment '0, 没有删除, 1 已经删除',
   update_time     datetime default current_timestamp                 not null
-  comment '提交时间‘'
+  comment '更新时间'
 );
    
 
