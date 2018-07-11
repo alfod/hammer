@@ -8,7 +8,8 @@ import (
 	"strings"
 
 	"os"
-    "strconv"
+	"strconv"
+
 	sql2 "../../util/sql"
 
 	"path/filepath"
@@ -17,18 +18,22 @@ import (
 	strings2 "../../util/string"
 )
 
-
 func main() {
 
 	sqlBytes, _ := ioutil.ReadFile(GetCurrentFilePath() + "sql")
 	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
 	sqlBytes = bytes.Replace(sqlBytes, []byte("`"), []byte(""), -1)
+	sqlBytes = bytes.Replace(sqlBytes, []byte("KEY.*\n"), []byte(""), -1)
+	sqlBytes = bytes.Replace(sqlBytes, []byte("key.*\n"), []byte(""), -1)
 	var sqlStr = strings.ToLower(string(sqlBytes))
-	//log.Println(sqlStr)
+	sqlKey := `\s*KEY|key\s+.*\n`;
+	sqlKeyPattern, _ := regexp.Compile(sqlKey)
+	sqlStr = sqlKeyPattern.ReplaceAllString(sqlStr, "")
+	log.Println(sqlStr)
 	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\w+\s*\n?\(\s*\n?(\s*[a-zA-Z\']+.*\n?)+\s*\n*\s*\)\s*\n*)+`).FindAllString(sqlStr, -1)
 	if len(sqls) > 0 {
-		for i,sql := range sqls {
-			log.Println("i: "+strconv.Itoa(i)+"\n")
+		for i, sql := range sqls {
+			log.Println("i: " + strconv.Itoa(i) + "\n")
 			dealSingleCreateSql(sql)
 		}
 	} else {
@@ -56,19 +61,44 @@ func dealSingleCreateSql(sql string) {
 		lines = strings.Split(content, ",\n")
 	}
 
-	var field, comments []string
-	var strType, comment string
-	for _, line := range lines {
-		field = strings.Fields(line)
+	var lineWords, comments []string
+	var comment string
+	var fields = make([]string, len(lines))
+	var types = make([]string, len(lines))
+	for index, line := range lines {
+		lineWords = strings.Fields(line)
+		if len(lineWords) < 2 {
+			continue
+		}
 		comments = commentReg.FindStringSubmatch(line)
 		if len(comments) > 0 {
 			comment = comments[1]
-			buffer.WriteString("    /**  " + comment + "*/ \n")
+			buffer.WriteString("     /**  " + comment + "*/ \n")
 		}
-		if len(field) > 2 {
-			strType = sql2.GetJavaTypeByMySql(field[1])
-			buffer.WriteString("    private " + strType + " " + strings2.ToLowerCamel(field[0]) + ";\n")
+		fields[index] = strings2.ToLowerCamel(lineWords[0])
+		types[index] = sql2.GetJavaTypeByMySql(lineWords[1])
+		if len(fields[index]) > 2 {
+			buffer.WriteString("     private " + types[index] + " " + fields[index] + ";\n")
 		}
+	}
+	var upperField string
+	var byteString []byte
+	buffer.WriteString(" \n")
+	for index, field := range fields {
+		if len(field) < 1 {
+			continue
+		}
+		byteString = []byte(field)
+		byteString[0] = field[0] - 32
+		upperField = string(byteString)
+		//setter
+		buffer.WriteString("     public  void set" + upperField + " (" + types[index] + " " + field + "){\n")
+		buffer.WriteString("            this." + field + " = " + field + ";\n")
+		buffer.WriteString("     } \n")
+		//getter
+		buffer.WriteString("     public  void get" + upperField + " (){\n")
+		buffer.WriteString("            return this." + field + ";\n ")
+		buffer.WriteString("    } \n")
 	}
 
 	buffer.WriteString("}\n")
@@ -88,7 +118,3 @@ func GetCurrentFilePath() string {
 	dir1, _ := filepath.Split(filename)
 	return dir1
 }
-
-
-
-
