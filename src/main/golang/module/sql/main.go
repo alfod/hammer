@@ -23,13 +23,11 @@ func main() {
 	sqlBytes, _ := ioutil.ReadFile(GetCurrentFilePath() + "sql")
 	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
 	sqlBytes = bytes.Replace(sqlBytes, []byte("`"), []byte(""), -1)
-	sqlBytes = bytes.Replace(sqlBytes, []byte("KEY.*\n"), []byte(""), -1)
-	sqlBytes = bytes.Replace(sqlBytes, []byte("key.*\n"), []byte(""), -1)
 	var sqlStr = strings.ToLower(string(sqlBytes))
 	sqlKey := `\s*KEY|key\s+.*\n`;
 	sqlKeyPattern, _ := regexp.Compile(sqlKey)
 	sqlStr = sqlKeyPattern.ReplaceAllString(sqlStr, "")
-	log.Println(sqlStr)
+	//log.Println(sqlStr)
 	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\w+\s*\n?\(\s*\n?(\s*[a-zA-Z\']+.*\n?)+\s*\n*\s*\)\s*\n*)+`).FindAllString(sqlStr, -1)
 	if len(sqls) > 0 {
 		for i, sql := range sqls {
@@ -52,7 +50,7 @@ func dealSingleCreateSql(sql string) {
 	var class_name = strings2.ToUpperCamel(tableName[2])
 
 	buffer.WriteString("public class " + class_name + "{ \n")
-	content := sql[strings.Index(sql, "(")+1: strings.LastIndex(sql, ")")]
+	content := sql[strings.Index(sql, "(")+1 : strings.LastIndex(sql, ")")]
 
 	var lines []string
 	if strings.Contains(content, ",\r\n") {
@@ -73,7 +71,9 @@ func dealSingleCreateSql(sql string) {
 		comments = commentReg.FindStringSubmatch(line)
 		if len(comments) > 0 {
 			comment = comments[1]
-			buffer.WriteString("     /**  " + comment + "*/ \n")
+			buffer.WriteString("     /** \n")
+			buffer.WriteString("      *  " + comment + "\n")
+			buffer.WriteString("      */ \n")
 		}
 		fields[index] = strings2.ToLowerCamel(lineWords[0])
 		types[index] = sql2.GetJavaTypeByMySql(lineWords[1])
@@ -101,7 +101,28 @@ func dealSingleCreateSql(sql string) {
 		buffer.WriteString("    } \n")
 	}
 
-	buffer.WriteString("}\n")
+	buffer.WriteString("\n")
+	buffer.WriteString(`     @Override
+     public String toString() {
+		`)
+	buffer.WriteString("   return \"" + class_name + "{\" + \n")
+	for index, field := range fields {
+		if len(field) < 1 {
+			continue
+		}
+		buffer.WriteString("                     \"")
+		if index > 0 {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString(field + " = \" + " + field + " + ")
+		if index >= len(fields)-2 {
+			buffer.WriteString(" \"}\";")
+		}
+		buffer.WriteString(" \n ")
+	}
+	buffer.WriteString("\n   	  }")
+	buffer.WriteString("\n }")
+
 	var java_file string = "./" + class_name + ".java"
 	file, err := os.Create(java_file)
 	file_content := buffer.String()
