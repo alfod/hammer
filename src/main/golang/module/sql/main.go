@@ -25,11 +25,11 @@ func main() {
 	sqlBytes = bytes.Replace(sqlBytes, []byte("\r"), []byte(""), -1)
 	sqlBytes = bytes.Replace(sqlBytes, []byte("`"), []byte(""), -1)
 	var sqlStr = strings.ToLower(string(sqlBytes))
-	sqlPrimarykey := `\s*primary key.*\n`;
+	sqlPrimarykey := `\s*primary\s+key\s+\(\s*\w+\s*\).*\n`;
 	sqlPrimaryKeyPattern, _ := regexp.Compile(sqlPrimarykey)
 	sqlStr = sqlPrimaryKeyPattern.ReplaceAllString(sqlStr, "")
 
-	sqlKey := `\s*\bkey\b.*\n`;
+	sqlKey := `\s*key\s+\w+\s*\(\s*\w+\s*\).*\n`;
 	sqlKeyPattern, _ := regexp.Compile(sqlKey)
 	sqlStr = sqlKeyPattern.ReplaceAllString(sqlStr, "")
 
