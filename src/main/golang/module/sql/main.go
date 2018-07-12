@@ -27,17 +27,32 @@ func main() {
 	var sqlStr = strings.ToLower(string(sqlBytes))
 	sqlPrimarykey := `\s*primary\s+key\s+\(\s*\w+\s*\).*\n`;
 	sqlPrimaryKeyPattern, _ := regexp.Compile(sqlPrimarykey)
-	sqlStr = sqlPrimaryKeyPattern.ReplaceAllString(sqlStr, "")
+	sqlStr = sqlPrimaryKeyPattern.ReplaceAllString(sqlStr, "\n")
+
+	//sqlSpace := `\s{2,}\n`;
+	//sqlSpacePattern, _ := regexp.Compile(sqlSpace)
+	//sqlStr = sqlSpacePattern.ReplaceAllString(sqlStr, "")
+
+	sqlAlter := `\).*\(`;
+	sqlAlterPattern, _ := regexp.Compile(sqlAlter)
+	sqlStr = sqlAlterPattern.ReplaceAllString(sqlStr, ")\n(")
+
+	sqlStr = strings.Replace(sqlStr, ";", "", -1)
+
+	sqlSharp := `\s*\#.*\n`;
+	sqlSharpPattern, _ := regexp.Compile(sqlSharp)
+	sqlStr = sqlSharpPattern.ReplaceAllString(sqlStr, "\n")
 
 	sqlKey := `\s*key\s+\w+\s*\(\s*\w+\s*\).*\n`;
 	sqlKeyPattern, _ := regexp.Compile(sqlKey)
-	sqlStr = sqlKeyPattern.ReplaceAllString(sqlStr, "")
+	sqlStr = sqlKeyPattern.ReplaceAllString(sqlStr, "\n")
 
 	sqlBracket := `\(\d+\)`;
 	sqlBracketPattern, _ := regexp.Compile(sqlBracket)
-	sqlStr = sqlBracketPattern.ReplaceAllString(sqlStr, "")
+	sqlStr = sqlBracketPattern.ReplaceAllString(sqlStr, "\n")
 	//log.Println(sqlStr)
-	var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+\w+\s*\n?\(\s*\n?(\s*[a-zA-Z\'\,]+.*\n?)+\s*\n*\s*\)\s*\n*)+`).FindAllString(sqlStr, -1)
+	//var sqls []string = regexp.MustCompile(`(\s*create\s+table\s+(\w+\.)?\w+\s*\n?\((\s*[^()]+\s*\n)+\)\;?\s*\n*)+`).FindAllString(sqlStr, -1)
+	var sqls []string = strings.Split(sqlStr, ")")
 	if len(sqls) > 0 {
 		for i, sql := range sqls {
 			log.Println("i: " + strconv.Itoa(i) + "\n")
@@ -52,7 +67,7 @@ func main() {
 func dealSingleCreateSql(sql string) {
 	var buffer bytes.Buffer
 	buffer.WriteString("\n\n")
-	content := sql[strings.Index(sql, "(")+1 : strings.LastIndex(sql, ")")]
+	content := sql[strings.Index(sql, "(")+1 : ]
 	var lines []string
 	if strings.Contains(content, ",\r\n") {
 		lines = strings.Split(content, ",\r\n")
